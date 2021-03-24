@@ -22,6 +22,9 @@ shop_list = [
 	{'name': 'Народный'},
 	{'name': 'Фрунзе'},
 ]
+
+globus_product_category_list = []
+
 globus_url = 'https://globus-online.kg/catalog/'
 
 
@@ -35,7 +38,9 @@ def send_welcome(message):
 		shop_list[2].get('name'),
 	)
 
-	if message.text.lower() == 'привет':
+	if message.text in globus_product_category_list:
+		get_products_by_category(message.text)
+	elif message.text.lower() == 'привет':
 		bot.reply_to(message=message,
 					 text=welcome_text,
 					 reply_markup=markup)
@@ -46,6 +51,7 @@ def send_welcome(message):
 		soup = soup.find_all('a', class_='parent')
 		for s in soup[2:]:
 			markup.add(s.text)
+			globus_product_category_list.append(s.text)
 		bot.send_message(chat_id=chat_id,
 						 text=list_product_category_names,
 						 reply_markup=markup)
@@ -59,6 +65,16 @@ def send_welcome(message):
 		bot.send_message(chat_id=message.chat.id,
 						 text=error_msg)
 
+
+def get_products_by_category(category_name):
+	for category in globus_product_category_list:
+		if category == category_name:
+			response = requests.get('https://globus-online.kg/catalog/myaso_ptitsa_ryba/')
+			soup = BeautifulSoup(response.text, 'lxml')
+			soup = soup.find_all('div', class_='list-showcase__name')
+			for s in soup:
+				print(s.text)
+			break
 #
 # def choice_shop(message):
 # 	chat_id = message.chat.id
